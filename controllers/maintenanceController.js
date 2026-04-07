@@ -1,5 +1,7 @@
 const Maintenance = require("../models/Maintenance");
 const User = require("../models/User");
+const sendNotification = require("../utils/sendNotification");
+
 
 // ✅ Create Request (Resident)
 exports.createRequest = async (req, res) => {
@@ -74,6 +76,13 @@ exports.updateStatus = async (req, res) => {
       req.params.id,
       { status },
       { new: true }
+    );
+
+     // ✅ SEND NOTIFICATION HERE
+    await sendNotification(
+      request.user,   // 👈 resident ID
+      "Your maintenance request is completed",
+      "maintenance"
     );
 
     res.json({
