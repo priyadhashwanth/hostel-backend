@@ -1,6 +1,7 @@
 const Maintenance = require("../models/Maintenance");
 const User = require("../models/User");
 const sendNotification = require("../utils/sendNotification");
+const sendEmail = require("../utils/sendEmail");
 
 
 // ✅ Create Request (Resident)
@@ -78,11 +79,21 @@ exports.updateStatus = async (req, res) => {
       { new: true }
     );
 
+       // ✅ FETCH USER (IMPORTANT)
+    const user = await User.findById(request.user);
+
      // ✅ SEND NOTIFICATION HERE
     await sendNotification(
       request.user,   // 👈 resident ID
       "Your maintenance request is completed",
       "maintenance"
+    );
+
+     // 📧 EMAIL NOTIFICATION (ADD THIS)
+    await sendEmail(
+      user.email,
+      "Maintenance Update",
+      "Your maintenance request has been completed"
     );
 
     res.json({
