@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const sendNotification = require("../utils/sendNotification");
 
 // Generate Token
 const generateToken = (id) => {
@@ -28,6 +29,13 @@ exports.register = async (req, res) => {
       role
     });
 
+    // 🔔 send notification
+await sendNotification(
+  user._id,
+  "Welcome! Your account has been created 🎉",
+  "register"
+);
+
     res.status(201).json({
       message: "User Registered ✅",
       token: generateToken(user._id)
@@ -46,10 +54,23 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && await bcrypt.compare(password, user.password)) {
+
+       // 🔔 send notification
+  await sendNotification(
+    user._id,
+    "You logged in successfully ✅",
+    "login"
+  );
+
       res.json({
         message: "Login Successful ✅",
         token: generateToken(user._id),
-        role: user.role
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
       });
     } else {
       res.status(401).json({ message: "Invalid Email or Password" });

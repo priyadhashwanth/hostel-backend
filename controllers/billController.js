@@ -124,6 +124,16 @@ exports.payBill = async (req, res) => {
     bill.status = "paid";
     await bill.save();
 
+    const sendNotification = require("../utils/sendNotification");
+
+
+//bill gerenate
+await sendNotification(
+  user._id,
+  `New bill of ₹${totalAmount} generated`,
+  "bill"
+);
+
     // 📧 Send confirmation
     await sendEmail(
       bill.user.email,
@@ -135,6 +145,22 @@ exports.payBill = async (req, res) => {
       message: "Payment successful",
       bill
     });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ❌ Delete Bill
+exports.deleteBill = async (req, res) => {
+  try {
+    const bill = await Bill.findByIdAndDelete(req.params.id);
+
+    if (!bill) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+
+    res.json({ message: "Bill deleted successfully" });
 
   } catch (error) {
     res.status(500).json({ message: error.message });

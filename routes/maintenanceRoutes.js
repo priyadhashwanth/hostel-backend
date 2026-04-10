@@ -25,3 +25,12 @@ router.put(
 );
 
 module.exports = router;
+
+//for delete
+
+router.delete(
+  "/:id",
+  protect,
+  authorizeRoles("admin", "staff"),
+  maintenanceController.deleteRequest
+);

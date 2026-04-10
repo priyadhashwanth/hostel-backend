@@ -105,3 +105,19 @@ exports.updateStatus = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+// ❌ Delete Request
+exports.deleteRequest = async (req, res) => {
+  try {
+    const request = await Maintenance.findByIdAndDelete(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({ message: "Request not found" });
+    }
+
+    res.json({ message: "Request deleted successfully" });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

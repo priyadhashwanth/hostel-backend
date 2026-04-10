@@ -22,3 +22,11 @@ router.post(
   authorizeRoles("admin"),
   roomController.checkoutRoom
 );
+
+//for delete
+router.delete(
+  "/:id",
+  protect,
+  authorizeRoles("admin"),
+  roomController.deleteRoom
+);

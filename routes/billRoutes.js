@@ -13,4 +13,12 @@ router.get("/my", protect, billController.getMyBills);
 // Payment
 router.put("/pay/:id", protect, billController.payBill);
 
+//delete
+router.delete(
+  "/:id",
+  protect,
+  authorizeRoles("admin"),
+  billController.deleteBill
+);
+
 module.exports = router;
