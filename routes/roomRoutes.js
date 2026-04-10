@@ -12,8 +12,6 @@ router.get("/", protect, roomController.getRooms);
 // Assign Room (Admin only)
 router.post("/assign", protect, authorizeRoles("admin"), roomController.assignRoom);
 
-module.exports = router;
-
 //checkout
 
 router.post(
@@ -30,3 +28,13 @@ router.delete(
   authorizeRoles("admin"),
   roomController.deleteRoom
 );
+
+//update rooms
+router.put(
+  "/:id",
+  protect,
+  authorizeRoles("admin"),
+  roomController.updateRoom
+);
+
+module.exports = router;

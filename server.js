@@ -3,6 +3,9 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const dns = require("dns");
 const connectDB = require("./config/db");
+const userRoutes=require("./routes/userRoutes");
+const maintenanceRoutes=require("./routes/maintenanceRoutes");
+
 
 // Fix DNS
 dns.setServers([
@@ -37,6 +40,7 @@ app.use("/api/rooms", require("./routes/roomRoutes"));
 app.use("/api/bills", require("./routes/billRoutes"));
 app.use("/api/reports", require("./routes/reportRoutes"));
 app.use("/api/notifications", require("./routes/notificationRoutes"));
+app.use("/api/users",userRoutes);
 
 // Test route
 app.get("/", (req, res) => {

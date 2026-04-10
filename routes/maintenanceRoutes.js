@@ -8,6 +8,14 @@ const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 router.post("/", protect, authorizeRoles("resident"), maintenanceController.createRequest);
 router.get("/my", protect, authorizeRoles("resident"), maintenanceController.getMyRequests);
 
+// Admin / Staff → GET ALL REQUESTS ✅
+router.get(
+  "/",
+  protect,
+  authorizeRoles("admin", "staff"),
+  maintenanceController.getAllRequests
+);
+
 // Admin / Staff
 
 router.put(
@@ -17,6 +25,7 @@ router.put(
   maintenanceController.assignTask
 );
 
+//update status
 router.put(
   "/status/:id",
   protect,
@@ -24,7 +33,6 @@ router.put(
   maintenanceController.updateStatus
 );
 
-module.exports = router;
 
 //for delete
 
@@ -34,3 +42,5 @@ router.delete(
   authorizeRoles("admin", "staff"),
   maintenanceController.deleteRequest
 );
+
+module.exports = router;

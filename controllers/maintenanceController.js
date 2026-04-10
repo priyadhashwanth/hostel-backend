@@ -121,3 +121,18 @@ exports.deleteRequest = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+//get all request
+
+exports.getAllRequests = async (req, res) => {
+  try {
+    const requests = await Maintenance.find()
+      .populate("user", "name")
+      .populate("assignedTo", "name");
+
+    res.json(requests);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

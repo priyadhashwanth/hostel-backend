@@ -115,3 +115,25 @@ exports.deleteRoom = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+//update room 
+exports.updateRoom = async (req, res) => {
+  try {
+    const { capacity } = req.body;
+
+    const room = await Room.findByIdAndUpdate(
+      req.params.id,
+      { capacity },
+      { new: true }
+    );
+
+    if (!room) {
+      return res.status(404).json({ message: "Room not found" });
+    }
+
+    res.json(room);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
