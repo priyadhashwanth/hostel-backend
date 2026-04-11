@@ -43,4 +43,22 @@ router.delete(
   maintenanceController.deleteRequest
 );
 
+//update request
+
+router.put(
+  "/:id",
+  protect,
+  authorizeRoles("resident"),
+  maintenanceController.updateRequest
+);
+
+//delete request
+
+router.delete(
+  "/:id",
+  protect,
+  authorizeRoles("resident", "admin", "staff"),
+  maintenanceController.deleteRequest
+);
+
 module.exports = router;
