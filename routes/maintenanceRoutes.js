@@ -34,14 +34,6 @@ router.put(
 );
 
 
-//for delete
-
-router.delete(
-  "/:id",
-  protect,
-  authorizeRoles("admin", "staff"),
-  maintenanceController.deleteRequest
-);
 
 //update request
 

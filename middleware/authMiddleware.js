@@ -2,11 +2,12 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 // ✅ Protect Route (Authentication)
-exports.protect = async (req, res, next) => {
-  let token;
 
+exports.protect = async (req, res, next) => {
   try {
-    // Check if token exists in headers
+    let token;
+
+    // Check token in headers
     if (
       req.headers.authorization &&
       req.headers.authorization.startsWith("Bearer")
@@ -17,17 +18,23 @@ exports.protect = async (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      // Get user from DB (without password)
-      req.user = await User.findById(decoded.id).select("-password");
+      console.log("DECODED:", decoded); // ✅ debug
 
-      if (!req.user) {
+      // Get user from DB
+      const user = await User.findById(decoded.id || decoded._id).select("-password");
+
+      // If user not found
+      if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
 
-      return next(); // ✅ move to next middleware/route
+      // ✅ IMPORTANT: attach user correctly
+      req.user = user;
+
+      return next();
     }
 
-    // If no token
+    // No token
     return res.status(401).json({ message: "No token provided" });
 
   } catch (error) {

@@ -189,9 +189,12 @@ exports.deleteRequest = async (req, res) => {
       return res.status(404).json({ message: "Request not found" });
     }
 
-    // 🔥 FIX (IMPORTANT)
-    if (request.user.toString() !== req.user.id.toString()) {
-      return res.status(403).json({ message: "Access denied" });
+    // ✅ allow admin OR owner
+    const isOwner = request.user.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === "admin";
+
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: "Access denied ❌" });
     }
 
     await request.deleteOne();
@@ -199,7 +202,7 @@ exports.deleteRequest = async (req, res) => {
     res.json({ message: "Deleted successfully ✅" });
 
   } catch (error) {
-    console.log(error);
+    console.log("DELETE ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };
