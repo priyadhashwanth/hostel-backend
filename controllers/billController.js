@@ -76,20 +76,17 @@ exports.getMyBills = async (req, res) => {
 
 exports.payBill = async (req, res) => {
   try {
-    const bill = await Bill.findByIdAndUpdate(
-      req.params.id,
-      { status: "paid" },
-      { new: true }
-    );
+    const bill = await Bill.findById(req.params.id);
 
-    // ✅ SEND NOTIFICATION HERE
-    await sendNotification(
-      bill.user._id,   // 👈 resident ID
-      "Payment successful",
-      "payment"
-    );
+    if (!bill) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
 
-    res.json({
+    bill.status = "paid";
+    await bill.save();
+
+    // ✅ IMPORTANT FIX
+    res.status(200).json({
       message: "Payment successful",
       bill
     });
@@ -124,7 +121,7 @@ exports.payBill = async (req, res) => {
     bill.status = "paid";
     await bill.save();
 
-    const sendNotification = require("../utils/sendNotification");
+    
 
 
 //bill gerenate

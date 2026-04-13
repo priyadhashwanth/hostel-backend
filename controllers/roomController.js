@@ -51,11 +51,20 @@ exports.assignRoom = async (req, res) => {
       return res.status(400).json({ message: "Room is full" });
     }
 
+    // ✅ prevent duplicate
+    if (room.occupants.includes(userId)) {
+      return res.status(400).json({ message: "User already assigned" });
+    }
+
     room.occupants.push(userId);
     await room.save();
 
     user.room = roomId;
     await user.save();
+
+    // ✅ IMPORTANT: populate before sending
+    const updatedRoom = await Room.findById(roomId)
+      .populate("occupants", "name email");
 
     res.json({
       message: "Room assigned",
@@ -129,6 +138,27 @@ exports.updateRoom = async (req, res) => {
 
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
+    }
+
+    res.json(room);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//get my rooms
+
+exports.getMyRoom = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const room = await Room.findOne({
+      occupants: userId
+    }).populate("occupants", "name email");
+
+    if (!room) {
+      return res.status(404).json({ message: "No room assigned" });
     }
 
     res.json(room);

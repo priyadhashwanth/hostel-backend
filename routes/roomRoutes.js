@@ -6,13 +6,26 @@ const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 // Create Room (Admin only)
 router.post("/", protect, authorizeRoles("admin"), roomController.createRoom);
 
-// Get Rooms
-router.get("/", protect, roomController.getRooms);
-
 // Assign Room (Admin only)
 router.post("/assign", protect, authorizeRoles("admin"), roomController.assignRoom);
 
-//checkout
+//get rooms(all roles)
+
+router.get("/", protect, authorizeRoles("admin", "staff", "resident"), roomController.getRooms);
+
+//get my rooms
+
+router.get(
+  "/my-room",
+  protect,
+  authorizeRoles("resident"),
+  roomController.getMyRoom
+);
+
+module.exports = router;
+
+
+//checkout( admin)
 
 router.post(
   "/checkout",
@@ -21,7 +34,7 @@ router.post(
   roomController.checkoutRoom
 );
 
-//for delete
+//for delete(admin)
 router.delete(
   "/:id",
   protect,
@@ -29,7 +42,7 @@ router.delete(
   roomController.deleteRoom
 );
 
-//update rooms
+//update rooms(admin)
 router.put(
   "/:id",
   protect,
@@ -37,4 +50,3 @@ router.put(
   roomController.updateRoom
 );
 
-module.exports = router;
