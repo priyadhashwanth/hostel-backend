@@ -21,4 +21,8 @@ router.delete(
   billController.deleteBill
 );
 
+//pay installments
+
+router.put("/installment/:id", protect, billController.payInstallment);
+
 module.exports = router;

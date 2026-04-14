@@ -17,8 +17,13 @@ exports.createBill = async (req, res) => {
 
     const user = await User.findById(userId);
 
-    const totalAmount =
-      rent + utilities + extraCharges - (discount || 0) + (lateFee || 0);
+    // ✅ STEP 1: CALCULATE TOTAL
+    const total =
+      (rent || 0) +
+      (utilities || 0) +
+      (extraCharges || 0) -
+      (discount || 0) +
+      (lateFee || 0);
 
 
     const bill = await Bill.create({
@@ -29,7 +34,8 @@ exports.createBill = async (req, res) => {
       extraCharges,
       discount,
       lateFee,
-      totalAmount
+      totalAmount:total,
+      remainingAmount:total
     });
 
 
@@ -38,14 +44,14 @@ exports.createBill = async (req, res) => {
   await sendEmail(
   user.email,
   "New Bill Generated",
-  `Your bill of ₹${totalAmount} is generated`
+  `Your bill of ₹${total} is generated`
 );
 
 //notification
 
 await sendNotification(
   user._id,
-  `New bill of ₹${totalAmount} generated`,
+  `New bill of ₹${total} generated`,
   "bill"
 );
     
@@ -82,19 +88,31 @@ exports.payBill = async (req, res) => {
       return res.status(404).json({ message: "Bill not found" });
     }
 
-   
+    // ✅ full payment amount
+    const amount = bill.remainingAmount || bill.totalAmount;
 
+    // ✅ add payment history
+    bill.paymentHistory.push({
+      amount,
+      date:new Date(),
+      transactionId: "TXN" + Date.now() // simple fake txn id
+    });
+
+    // ✅ update remaining
+    bill.remainingAmount = 0;
+
+    // ✅ update status
     bill.status = "paid";
+
     await bill.save();
 
-    return res.status(200).json({
+    res.status(200).json({
       message: "Payment successful",
-      bill,
+      bill
     });
 
   } catch (error) {
-    console.log("PAY ERROR:", error);
-    return res.status(500).json({ message:"Payment failed" });
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -114,41 +132,6 @@ exports.getAllBills = async (req, res) => {
 };
 
 
-//export email
-
-exports.payBill = async (req, res) => {
-  try {
-    const bill = await Bill.findById(req.params.id).populate("user");
-
-    bill.status = "paid";
-    await bill.save();
-
-    
-
-
-//bill gerenate
-await sendNotification(
-  user._id,
-  `New bill of ₹${totalAmount} generated`,
-  "bill"
-);
-
-    // 📧 Send confirmation
-    await sendEmail(
-      bill.user.email,
-      "Payment Successful",
-      "Your payment is completed"
-    );
-
-    res.json({
-      message: "Payment successful",
-      bill
-    });
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 // ❌ Delete Bill
 exports.deleteBill = async (req, res) => {
@@ -163,5 +146,49 @@ exports.deleteBill = async (req, res) => {
 
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+//pay installment
+
+exports.payInstallment = async (req, res) => {
+  try {
+    const { amount } = req.body;
+
+    const bill = await Bill.findById(req.params.id);
+
+    if (!bill) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+
+    // ❌ prevent overpayment
+    if (amount > bill.remainingAmount) {
+      return res.status(400).json({ message: "Too much amount" });
+    }
+
+    // ✅ reduce remaining
+    bill.remainingAmount -= amount;
+
+    // ✅ add installment
+    bill.installments.push({
+      amount,
+      paid: true,
+      date: new Date()
+    });
+
+    // ✅ if fully paid
+    if (bill.remainingAmount === 0) {
+      bill.status = "paid";
+    }
+
+    await bill.save();
+
+    res.json({
+      message: "Installment paid",
+      bill
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };

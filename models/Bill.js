@@ -34,6 +34,7 @@ const billSchema = new mongoose.Schema({
       transactionId: String
     }
   ],
+  
 
  // ✅ OPTIONAL (Installments)
 
