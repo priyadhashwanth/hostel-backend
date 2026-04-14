@@ -82,17 +82,19 @@ exports.payBill = async (req, res) => {
       return res.status(404).json({ message: "Bill not found" });
     }
 
+   
+
     bill.status = "paid";
     await bill.save();
 
-    // ✅ IMPORTANT FIX
-    res.status(200).json({
+    return res.status(200).json({
       message: "Payment successful",
-      bill
+      bill,
     });
 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.log("PAY ERROR:", error);
+    return res.status(500).json({ message:"Payment failed" });
   }
 };
 

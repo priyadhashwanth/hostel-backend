@@ -20,7 +20,35 @@ const billSchema = new mongoose.Schema({
     type: String,
     enum: ["pending", "paid"],
     default: "pending"
+  },
+
+  //payment history
+
+   paymentHistory: [
+    {
+      amount: Number,
+      date: {
+        type: Date,
+        default: Date.now
+      },
+      transactionId: String
+    }
+  ],
+
+ // ✅ OPTIONAL (Installments)
+
+ installments: [
+  {
+    amount: Number,
+    paid: {
+      type: Boolean,
+      default: false
+    },
+    date: Date
   }
+],
+remainingAmount: Number
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("Bill", billSchema);
