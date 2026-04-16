@@ -17,7 +17,7 @@ const generateToken = (id) => {
 // ✅ REGISTER
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role,phone,address,emergencyContact } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -26,18 +26,32 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    console.log("REQ BODY",req.body);
+
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
-      role
+      role,
+      phone,
+      address,
+      emergencyContact
     });
 
     // 🔔 send notification
-await sendNotification(
-  user._id,
-  "Welcome! Your account has been created 🎉",
-  "register"
+await sendNotification({
+  userId:user._id,
+  message:"Welcome! Your account has been created 🎉",
+  type:"info"
+  
+  });
+
+  //email notification
+
+  await sendEmail(
+  user.email,
+  "Welcome 🎉",
+  `Hello ${user.name}, your account has been created successfully!`
 );
 
     res.status(201).json({
@@ -71,11 +85,19 @@ exports.login = async (req, res) => {
     }
 
     // 🔔 send notification (safe)
-    await sendNotification(
-      user._id,
-      "You logged in successfully ✅",
-      "login"
-    );
+    await sendNotification({
+       userId: user._id,
+  message: "You logged in successfully ✅"
+  
+});
+
+//email notification
+
+await sendEmail(
+  user.email,
+  "Login Alert 🔐",
+  `Hi ${user.name}, you logged in successfully.`
+);
 
     // ✅ SUCCESS RESPONSE
     res.json({
@@ -97,8 +119,28 @@ exports.login = async (req, res) => {
 
 //logout
 
-exports.logout = (req, res) => {
-  res.json({
-    message: "Logged out successfully"
-  });
+// 🔴 LOGOUT
+exports.logout = async (req, res) => {
+  try {
+
+    //send notification 
+
+    await sendNotification({
+      userId: req.user._id,
+      message: "You logged out successfully 👋",
+      type:"info"
+    });
+
+    //email notification
+
+    await sendEmail(
+  req.user.email,
+  "Logout Alert 👋",
+  `Hi ${req.user.name}, you logged out successfully.`
+);
+
+    res.json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };

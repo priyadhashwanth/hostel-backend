@@ -42,6 +42,49 @@ exports.getRevenue = async (req, res) => {
   }
 };
 
+//monthly revenue
+
+exports.getMonthlyRevenue = async (req, res) => {
+  try {
+    const bills = await Bill.find({ status: "paid" });
+
+    const monthlyData = {};
+
+    bills.forEach((bill) => {
+      const date = new Date(bill.createdAt);
+      const month = date.toLocaleString("default", { month: "short" });
+
+      if (!monthlyData[month]) {
+        monthlyData[month] = 0;
+      }
+
+      monthlyData[month] += bill.totalAmount;
+    });
+
+    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+// Step 1: create all months with 0
+let fullYear = monthNames.map(month => ({
+  month,
+  revenue: 0
+}));
+
+// Step 2: fill actual data
+Object.keys(monthlyData).forEach(month => {
+  const index = monthNames.indexOf(month);
+  if (index !== -1) {
+    fullYear[index].revenue = monthlyData[month];
+  }
+});
+
+// Step 3: send response
+res.json(fullYear);
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 
 // ✅ 3. EXPENSES (STATIC)
 exports.getExpenses = async (req, res) => {

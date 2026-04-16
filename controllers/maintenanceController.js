@@ -20,6 +20,13 @@ exports.createRequest = async (req, res) => {
       priority
     });
 
+    // 🔔 Notify Admin (GLOBAL)
+await sendNotification({
+  userId:req.user.id,
+  message: "New maintenance request has been submitted",
+  
+});
+
     res.status(201).json(request);
 
   } catch (error) {
@@ -63,6 +70,20 @@ exports.assignTask = async (req, res) => {
       { new: true }
     ).populate("assignedTo", "name");
 
+    // 🔔 Notify Staff
+await sendNotification({
+  userId: staffId,
+  message: "You have been assigned a maintenance task 🧰"
+  
+});
+
+// 🔔 Notify Resident
+await sendNotification({
+  userId: req.user.id,
+  message: "Your request is now in progress"
+  
+});
+
     res.json({
       message: "Task assigned successfully ✅",
       request
@@ -80,28 +101,31 @@ exports.updateStatus = async (req, res) => {
   try {
     const { status } = req.body;
 
-    const request = await Maintenance.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
+   await Maintenance.findByIdAndUpdate(
+  req.params.id,
+  { status }
+);
+
+const request = await Maintenance.findById(req.params.id);
 
        // ✅ FETCH USER (IMPORTANT)
     const user = await User.findById(request.user);
 
-     // ✅ SEND NOTIFICATION HERE
-    await sendNotification(
+    console.log("REQUEST USER:", request.user);
+
+     // 🔔 Correct user
+ await sendNotification(
       request.user,   // 👈 resident ID
       "Your maintenance request is completed",
       "maintenance"
     );
 
      // 📧 EMAIL NOTIFICATION (ADD THIS)
-    await sendEmail(
-      user.email,
-      "Maintenance Update",
-      "Your maintenance request has been completed"
-    );
+    await sendNotification({
+      userId:req.user.id,  // ✅ THIS IS THE FIX
+      message: `Your maintenance request is ${status}`,
+      type: "maintenance"
+    });
 
     res.json({
       message: "Status updated",
@@ -121,6 +145,14 @@ exports.deleteRequest = async (req, res) => {
     if (!request) {
       return res.status(404).json({ message: "Request not found" });
     }
+
+    //notification
+
+    await sendNotification({
+  userId: req.user.id,
+  message: "Your maintenance request was deleted"
+  
+});
 
     res.json({ message: "Request deleted successfully" });
 
@@ -172,6 +204,21 @@ exports.updateRequest = async (req, res) => {
 
     await request.save();
 
+    //notification
+
+    await sendNotification({
+  userId: req.user.id,
+  message: "Your maintenance request updated"
+    });
+
+    //email notification
+
+    await sendEmail(
+      user.email,
+      "Maintenance Update",
+      `Your maintenance request is ${status}`
+    );
+
     res.json({ message: "Request updated", request });
 
   } catch (error) {
@@ -199,7 +246,14 @@ exports.deleteRequest = async (req, res) => {
 
     await request.deleteOne();
 
-    res.json({ message: "Deleted successfully ✅" });
+    //notification
+
+    await sendNotification({
+  userId: req.user.id,
+  message: "Your maintenance request was deleted"
+    });
+
+res.json({ message: "Deleted successfully ✅" });
 
   } catch (error) {
     console.log("DELETE ERROR:", error);

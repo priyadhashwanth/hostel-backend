@@ -1,5 +1,6 @@
 const Room = require("../models/Room");
 const User = require("../models/User");
+const sendNotification = require("../utils/sendNotification");
 
 // Create Room
 exports.createRoom = async (req, res) => {
@@ -10,7 +11,22 @@ exports.createRoom = async (req, res) => {
       roomNumber,
       capacity
     });
+    
+    // 🔔 Notification
+await sendNotification({
+  message:` New room ${roomNumber} created 🏠`,
+  type: "room"
+});
 
+//email notification
+
+await sendEmail(
+  user.email,
+  "Room created",
+  `You have been created room ${room.roomNumber}`
+);
+     
+   
     res.status(201).json({
       message: "Room created",
       room
@@ -66,7 +82,24 @@ exports.assignRoom = async (req, res) => {
     const updatedRoom = await Room.findById(roomId)
       .populate("occupants", "name email");
 
-    res.json({
+      //notification
+
+      await sendNotification({
+  userId: userId,
+  message:` Room ${room.roomNumber} assigned to you 🛏️`,
+  type: "room"
+});
+
+//email notification
+
+await sendEmail(
+  user.email,
+  "Room Assigned",
+  `You have been assigned to room ${room.roomNumber}`
+);
+
+   
+      res.json({
       message: "Room assigned",
       room
     });
@@ -100,6 +133,22 @@ exports.checkoutRoom = async (req, res) => {
     user.room = null;
     await user.save();
 
+    //notification
+
+    await sendNotification({
+  userId: userId,
+  message: "You checked out from room 🏠",
+  type: "room"
+});
+
+//email notification
+
+await sendEmail(
+  user.email,
+  "Room Checkout",
+  "You have successfully checked out"
+);
+
     res.json({
       message: "User checked out successfully"
     });
@@ -117,6 +166,21 @@ exports.deleteRoom = async (req, res) => {
     if (!room) {
       return res.status(404).json({ message: "Room not found" });
     }
+
+    //notification
+
+    await sendNotification({
+  message: `Room ${room.roomNumber} deleted✏️`,
+  type: "room"
+});
+
+//email notification
+
+await sendEmail(
+  user.email,
+  "Room deleted",
+  `You have been deleted room ${room.roomNumber}`
+);
 
     res.json({ message: "Room deleted successfully" });
 

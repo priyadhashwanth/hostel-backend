@@ -24,13 +24,18 @@ const userSchema = new mongoose.Schema({
 address: String,
 emergencyContact: {
   name: String,
-  phone: String
+  phone: String,
+  relation:String
 },
 
   room: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Room"
-  }
+  },
+
+  checkInDate:Date,
+  checkOutDate:Date
+
 
 }, { timestamps: true });
 

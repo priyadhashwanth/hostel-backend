@@ -9,6 +9,10 @@ router.get("/occupancy", protect, authorizeRoles("admin"), reportController.getO
 // 💰 Revenue
 router.get("/revenue", protect, authorizeRoles("admin"), reportController.getRevenue);
 
+//monthly revenue
+
+router.get("/monthly-revenue", protect, authorizeRoles("admin"),reportController.getMonthlyRevenue);
+
 // 💸 Expenses
 router.get("/expenses", protect, authorizeRoles("admin"), reportController.getExpenses);
 

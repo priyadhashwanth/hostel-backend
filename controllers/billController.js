@@ -49,11 +49,13 @@ exports.createBill = async (req, res) => {
 
 //notification
 
-await sendNotification(
-  user._id,
-  `New bill of ₹${total} generated`,
-  "bill"
-);
+    await sendNotification({
+      userId: userId,   // 👈 bill owner
+      message: `New bill generated: ₹${amount} 💰`,
+      type: "bill"
+    });
+
+    
     
     res.status(201).json({
       message: "Bill created",
@@ -104,6 +106,21 @@ exports.payBill = async (req, res) => {
     // ✅ update status
     bill.status = "paid";
 
+    // 🔔 NOTIFICATION
+    await sendNotification({
+      userId: bill.user,   // 👈 VERY IMPORTANT
+      message: "Payment successful ✅",
+      type: "bill"
+    });
+
+    //email notification
+
+    await sendEmail(
+  user.email,
+  "Payment Successful",
+  "Your payment has been completed successfully"
+);
+
     await bill.save();
 
     res.status(200).json({
@@ -142,6 +159,26 @@ exports.deleteBill = async (req, res) => {
       return res.status(404).json({ message: "Bill not found" });
     }
 
+    // 🔥 Store user BEFORE delete
+    const userId = bill.user;
+
+    await bill.deleteOne();
+
+    // 🔔 NOTIFICATION (to resident)
+    await sendNotification({
+      userId: userId,
+      message: "Your bill has been deleted ❌",
+      type: "bill"
+    });
+
+    //email notification
+    
+    await sendEmail(
+  user.email,
+  "Bill Removed",
+  "Your bill has been deleted by admin"
+);
+   
     res.json({ message: "Bill deleted successfully" });
 
   } catch (error) {

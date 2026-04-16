@@ -4,9 +4,19 @@ const Notification = require("../models/Notification");
 
 exports.getNotifications = async (req, res) => {
   try {
-    const notifications = await Notification.find({
-      user: req.user._id
+    let notifications;
+
+    if (req.user.role==="admin"){
+      notifications=await Notification.find()
+      .sort({createdAt:-1});
+    }else{
+     notifications = await Notification.find({
+      $or: [
+        { user: req.user._id },  // user specific
+        { user: null }           // global
+      ]
     }).sort({ createdAt: -1 });
+  }
 
     res.json(notifications);
 
