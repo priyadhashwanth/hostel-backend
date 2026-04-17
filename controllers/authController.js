@@ -2,6 +2,7 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const sendNotification = require("../utils/sendNotification");
+const sendEmail=require("../utils/sendEmail");
 
 // Generate Token
 const generateToken = (id) => {

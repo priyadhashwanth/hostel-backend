@@ -27,7 +27,7 @@ await sendNotification({
   
 });
 
-    res.status(201).json(request);
+res.status(201).json(request);
 
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -113,6 +113,7 @@ const request = await Maintenance.findById(req.params.id);
 
     console.log("REQUEST USER:", request.user);
 
+     
      // 🔔 Correct user
  await sendNotification(
       request.user,   // 👈 resident ID
@@ -211,13 +212,7 @@ exports.updateRequest = async (req, res) => {
   message: "Your maintenance request updated"
     });
 
-    //email notification
-
-    await sendEmail(
-      user.email,
-      "Maintenance Update",
-      `Your maintenance request is ${status}`
-    );
+   
 
     res.json({ message: "Request updated", request });
 

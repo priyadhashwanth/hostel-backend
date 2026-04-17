@@ -1,6 +1,8 @@
 const Room = require("../models/Room");
 const User = require("../models/User");
 const sendNotification = require("../utils/sendNotification");
+const sendEmail=require("../utils/sendEmail");
+
 
 // Create Room
 exports.createRoom = async (req, res) => {
@@ -18,13 +20,7 @@ await sendNotification({
   type: "room"
 });
 
-//email notification
 
-await sendEmail(
-  user.email,
-  "Room created",
-  `You have been created room ${room.roomNumber}`
-);
      
    
     res.status(201).json({
@@ -174,13 +170,7 @@ exports.deleteRoom = async (req, res) => {
   type: "room"
 });
 
-//email notification
 
-await sendEmail(
-  user.email,
-  "Room deleted",
-  `You have been deleted room ${room.roomNumber}`
-);
 
     res.json({ message: "Room deleted successfully" });
 
