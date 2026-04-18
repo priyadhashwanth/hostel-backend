@@ -19,7 +19,7 @@ exports.createBill = async (req, res) => {
       lateFee
     } = req.body;
 
-    // ✅ check user
+    //  check user
     if (!userId) {
       return res.status(400).json({ message: "User required" });
     }
@@ -30,14 +30,14 @@ exports.createBill = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // ✅ convert to numbers
+    //  convert to numbers
     rent = Number(rent) || 0;
     utilities = Number(utilities) || 0;
     extraCharges = Number(extraCharges) || 0;
     discount = Number(discount) || 0;
     lateFee = Number(lateFee) || 0;
 
-    // ✅ calculate total
+    //  calculate total
     const total =
       rent +
       utilities +
@@ -57,17 +57,17 @@ exports.createBill = async (req, res) => {
       status: "pending"
     });
 
-    // ✅ send email
+    //  send email
     await sendEmail(
       user.email,
       "New Bill Generated",
       `Your bill of ₹${total} is generated`
     );
 
-    // ✅ send notification (FIXED)
+    //  send notification (FIXED)
     await sendNotification({
       userId: userId,
-      message: `New bill generated: ₹${total} 💰`,
+      message: `New bill generated: ₹${total} `,
       type: "bill"
     });
 
@@ -104,29 +104,29 @@ exports.payBill = async (req, res) => {
       return res.status(404).json({ message: "Bill not found" });
     }
 
-    // ✅ GET USER
+    //  GET USER
     const user = await User.findById(bill.user);
 
-    // ✅ full payment amount
+    //  full payment amount
     const amount = bill.remainingAmount || bill.totalAmount;
 
-    // ✅ add payment history
+    //  add payment history
     bill.paymentHistory.push({
       amount,
       date:new Date(),
       transactionId: "TXN" + Date.now() // simple fake txn id
     });
 
-    // ✅ update remaining
+    //  update remaining
     bill.remainingAmount = 0;
 
-    // ✅ update status
+    //  update status
     bill.status = "paid";
 
-    // 🔔 NOTIFICATION
+    //  NOTIFICATION
     await sendNotification({
-      userId: bill.user,   // 👈 VERY IMPORTANT
-      message: "Payment successful ✅",
+      userId: bill.user,   //bill
+      message: "Payment successful ",
       type: "bill"
     });
 
@@ -167,34 +167,34 @@ exports.getAllBills = async (req, res) => {
 
 
 
-// ❌ Delete Bill
+//  Delete Bill
 
 exports.deleteBill = async (req, res) => {
   try {
-    // ✅ FIND BILL FIRST
+    //  FIND BILL FIRST
     const bill = await Bill.findById(req.params.id);
 
     if (!bill) {
       return res.status(404).json({ message: "Bill not found" });
     }
 
-    // ✅ GET USER ID
+    //  GET USER ID
     const userId = bill.user;
 
-    // ✅ GET USER
+    //  GET USER
     const user = await User.findById(userId);
 
-    // ✅ DELETE BILL
+    // DELETE BILL
     await Bill.findByIdAndDelete(req.params.id);
 
-    // 🔔 NOTIFICATION
+    //  NOTIFICATION
     await sendNotification({
       userId: userId,
-      message: "Your bill has been deleted ❌",
+      message: "Your bill has been deleted ",
       type: "bill"
     });
 
-    // 📧 EMAIL
+    //  EMAIL
     if (user?.email) {
       await sendEmail(
         user.email,
@@ -203,13 +203,13 @@ exports.deleteBill = async (req, res) => {
       );
     }
 
-    // ✅ SEND RESPONSE (IMPORTANT)
+    //  SEND RESPONSE (IMPORTANT)
     return res.status(200).json({
       message: "Bill deleted successfully"
     });
 
   } catch (error) {
-    console.log("DELETE ERROR:", error); // 🔥 debug
+   // console.log("DELETE ERROR:", error); // debug
     return res.status(500).json({ message: error.message });
   }
 };
@@ -226,10 +226,10 @@ exports.payInstallment = async (req, res) => {
       return res.status(404).json({ message: "Bill not found" });
     }
 
-    // ✅ CONVERT TO NUMBER (VERY IMPORTANT)
+    // CONVERT TO NUMBER (VERY IMPORTANT)
     const payAmount = parseInt(req.body.amount);
 
-    // ✅ VALIDATION
+    //  VALIDATION
     if (!payAmount || payAmount <= 0) {
       return res.status(400).json({ message: "Invalid amount" });
     }
@@ -238,7 +238,7 @@ exports.payInstallment = async (req, res) => {
       return res.status(400).json({ message: "Too much amount" });
     }
 
-    // ✅ REDUCE REMAINING (AFTER VALIDATION)
+    //  REDUCE REMAINING (AFTER VALIDATION)
     bill.remainingAmount= Number(bill.remainingAmount- payAmount);
 
     //avoid negative
@@ -246,14 +246,14 @@ exports.payInstallment = async (req, res) => {
       bill.remainingAmount=0;
     }
 
-    // ✅ add history
+    //  add history
     bill.paymentHistory.push({
       amount: payAmount,
       date: new Date(),
       transactionId: "TXN" + Date.now()
     });
 
-    // ✅ IF FULLY PAID
+    //  IF FULLY PAID
     if (bill.remainingAmount === 0) {
       bill.status = "paid";
     }
@@ -272,9 +272,7 @@ exports.payInstallment = async (req, res) => {
 
 // razorpay
 
-
-
-// 🔵 CREATE ORDER
+//  CREATE ORDER
 exports.createOrder = async (req, res) => {
   try {
     const bill = await Bill.findById(req.params.id);
@@ -312,8 +310,6 @@ exports.createOrder = async (req, res) => {
 
 //verify payment
 
-
-
 exports.verifyPayment = async (req, res) => {
   try {
     const {
@@ -331,10 +327,10 @@ exports.verifyPayment = async (req, res) => {
       .digest("hex");
 
     if (expectedSign !== razorpay_signature) {
-      return res.status(400).json({ message: "Invalid payment ❌" });
+      return res.status(400).json({ message: "Invalid payment " });
     }
 
-    // ✅ UPDATE BILL
+    //  UPDATE BILL
     const bill = await Bill.findById(billId);
 
     bill.paymentHistory.push({
@@ -348,14 +344,14 @@ exports.verifyPayment = async (req, res) => {
 
     await bill.save();
 
-    // 🔔 notification
+    //  notification
     await sendNotification({
       userId: bill.user,
-      message: "Payment successful via Razorpay ✅",
+      message: "Payment successful via Razorpay ",
       type: "bill"
     });
 
-    res.json({ message: "Payment verified ✅" });
+    res.json({ message: "Payment verified " });
 
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -5,7 +5,7 @@ const User = require("../models/User");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
 
 
-// ✅ GET ALL USERS (Admin / Staff)
+//  GET ALL USERS (Admin / Staff)
 router.get(
   "/",protect,authorizeRoles("admin","staff"),
     async (req, res) => {
@@ -23,7 +23,7 @@ router.get(
 );
 
 
-// ✅ UPDATE USER (Admin only)
+//  UPDATE USER (Admin only)
 router.put(
   "/:id",
   protect,
@@ -59,7 +59,7 @@ router.put(
 );
 
 
-// ✅ GET SINGLE USER (optional)
+//  GET SINGLE USER (optional)
 router.get(
   "/:id",
   protect,

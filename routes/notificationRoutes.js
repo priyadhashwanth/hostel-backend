@@ -8,10 +8,10 @@ const {
   markAsRead
 } = require("../controllers/notificationController");
 
-// ✅ GET
+//  GET
 router.get("/", protect, getNotifications);
 
-// ✅ MARK AS READ
+//  MARK AS READ
 router.put("/:id", protect, markAsRead);
 
 module.exports = router;

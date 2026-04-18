@@ -22,17 +22,17 @@ connectDB();
 
 const app = express();
 
-// ✅ VERY IMPORTANT
+//  VERY IMPORTANT
 app.use(express.json());
 
-// ✅ Body parser (VERY IMPORTANT)
+//  Body parser (VERY IMPORTANT)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Enable CORS
 app.use(cors());
 
-// ✅ Routes
+//  Routes
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/test", require("./routes/testRoutes"));
 app.use("/api/maintenance", require("./routes/maintenanceRoutes"));
@@ -44,7 +44,7 @@ app.use("/api/users",userRoutes);
 
 // Test route
 app.get("/", (req, res) => {
-  res.send("API Running 🚀");
+  res.send("API Running ");
 });
 
 // Start server

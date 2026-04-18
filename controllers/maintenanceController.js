@@ -4,7 +4,7 @@ const sendNotification = require("../utils/sendNotification");
 const sendEmail = require("../utils/sendEmail");
 
 
-// ✅ Create Request (Resident)
+//  Create Request (Resident)
 exports.createRequest = async (req, res) => {
   try {
     const { title, issue, priority } = req.body;
@@ -20,7 +20,7 @@ exports.createRequest = async (req, res) => {
       priority
     });
 
-    // 🔔 Notify Admin (GLOBAL)
+    //  Notify Admin (GLOBAL)
 await sendNotification({
   userId:req.user.id,
   message: "New maintenance request has been submitted",
@@ -34,7 +34,7 @@ res.status(201).json(request);
   }
 };
 
-// ✅ Get My Requests (Resident)
+//  Get My Requests (Resident)
 exports.getMyRequests = async (req, res) => {
   try {
     const requests = await Maintenance.find({
@@ -53,9 +53,9 @@ exports.getMyRequests = async (req, res) => {
 
 exports.assignTask = async (req, res) => {
   try {
-    console.log("BODY:", req.body); // 🔍 debug
+    console.log("BODY:", req.body); //  debug
 
-    const { staffId } = req.body;   // ✅ MUST BE staffId
+    const { staffId } = req.body;   //  MUST BE staffId
 
     if (!staffId) {
       return res.status(400).json({ message: "Staff ID required" });
@@ -64,20 +64,20 @@ exports.assignTask = async (req, res) => {
     const request = await Maintenance.findByIdAndUpdate(
       req.params.id,
       {
-        assignedTo: staffId,       // ✅ use same name
+        assignedTo: staffId,       //  use same name
         status: "in-progress"
       },
       { new: true }
     ).populate("assignedTo", "name");
 
-    // 🔔 Notify Staff
+    //  Notify Staff
 await sendNotification({
   userId: staffId,
-  message: "You have been assigned a maintenance task 🧰"
+  message: "You have been assigned a maintenance task "
   
 });
 
-// 🔔 Notify Resident
+//  Notify Resident
 await sendNotification({
   userId: req.user.id,
   message: "Your request is now in progress"
@@ -85,12 +85,12 @@ await sendNotification({
 });
 
     res.json({
-      message: "Task assigned successfully ✅",
+      message: "Task assigned successfully ",
       request
     });
 
   } catch (error) {
-    console.log(error); // 🔍 see error
+    console.log(error); // see error
     res.status(500).json({ message: error.message });
   }
 };
@@ -108,22 +108,24 @@ exports.updateStatus = async (req, res) => {
 
 const request = await Maintenance.findById(req.params.id);
 
-       // ✅ FETCH USER (IMPORTANT)
+       //  FETCH USER (IMPORTANT)
     const user = await User.findById(request.user);
 
-    console.log("REQUEST USER:", request.user);
+    //console.log("REQUEST USER:", request.user);
 
      
-     // 🔔 Correct user
- await sendNotification(
-      request.user,   // 👈 resident ID
+     //  Correct user
+ 
+     await sendNotification(
+      request.user,   //  resident ID
       "Your maintenance request is completed",
       "maintenance"
     );
 
      // 📧 EMAIL NOTIFICATION (ADD THIS)
-    await sendNotification({
-      userId:req.user.id,  // ✅ THIS IS THE FIX
+    
+     await sendNotification({
+      userId:req.user.id,  //  THIS IS THE FIX
       message: `Your maintenance request is ${status}`,
       type: "maintenance"
     });
@@ -138,7 +140,7 @@ const request = await Maintenance.findById(req.params.id);
   }
 };
 
-// ❌ Delete Request
+//  Delete Request
 exports.deleteRequest = async (req, res) => {
   try {
     const request = await Maintenance.findByIdAndDelete(req.params.id);
@@ -189,12 +191,12 @@ exports.updateRequest = async (req, res) => {
       return res.status(404).json({ message: "Request not found" });
     }
 
-    // ✅ Only owner can edit
+    //  Only owner can edit
     if (request.user.toString() !== req.user.id) {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    // ✅ Optional: allow edit only if pending
+    //   allow edit only if pending
     if (request.status !== "pending") {
       return res.status(400).json({ message: "Cannot edit after processing" });
     }
@@ -231,12 +233,12 @@ exports.deleteRequest = async (req, res) => {
       return res.status(404).json({ message: "Request not found" });
     }
 
-    // ✅ allow admin OR owner
+    //  allow admin OR owner
     const isOwner = request.user.toString() === req.user._id.toString();
     const isAdmin = req.user.role === "admin";
 
     if (!isOwner && !isAdmin) {
-      return res.status(403).json({ message: "Access denied ❌" });
+      return res.status(403).json({ message: "Access denied " });
     }
 
     await request.deleteOne();
@@ -248,10 +250,10 @@ exports.deleteRequest = async (req, res) => {
   message: "Your maintenance request was deleted"
     });
 
-res.json({ message: "Deleted successfully ✅" });
+res.json({ message: "Deleted successfully " });
 
   } catch (error) {
-    console.log("DELETE ERROR:", error);
+    //console.log("DELETE ERROR:", error);
     res.status(500).json({ message: error.message });
   }
 };

@@ -15,7 +15,7 @@ const generateToken = (id) => {
   });
 };
 
-// ✅ REGISTER
+//  REGISTER
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role,phone,address,emergencyContact } = req.body;
@@ -27,7 +27,7 @@ exports.register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    console.log("REQ BODY",req.body);
+    //console.log("REQ BODY",req.body);
 
     const user = await User.create({
       name,
@@ -39,7 +39,7 @@ exports.register = async (req, res) => {
       emergencyContact
     });
 
-    // 🔔 send notification
+    //  send notification
 await sendNotification({
   userId:user._id,
   message:"Welcome! Your account has been created 🎉",
@@ -51,12 +51,12 @@ await sendNotification({
 
   await sendEmail(
   user.email,
-  "Welcome 🎉",
+  "Welcome ",
   `Hello ${user.name}, your account has been created successfully!`
 );
 
     res.status(201).json({
-      message: "User Registered ✅",
+      message: "User Registered ",
       token: generateToken(user._id)
     });
 
@@ -65,7 +65,7 @@ await sendNotification({
   }
 };
 
-// ✅ LOGIN
+//  LOGIN
 
 exports.login = async (req, res) => {
   try {
@@ -73,22 +73,22 @@ exports.login = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    // ✅ Check user exists FIRST
+    //  Check user exists FIRST
     if (!user) {
       return res.status(404).json({ message: "User not found ❌" });
     }
 
-    // ✅ Check password
+    //  Check password
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(401).json({ message: "Invalid Email or Password ❌" });
     }
 
-    // 🔔 send notification (safe)
+    //  send notification (safe)
     await sendNotification({
        userId: user._id,
-  message: "You logged in successfully ✅"
+  message: "You logged in successfully "
   
 });
 
@@ -96,31 +96,44 @@ exports.login = async (req, res) => {
 
 await sendEmail(
   user.email,
-  "Login Alert 🔐",
+  "Login Alert ",
   `Hi ${user.name}, you logged in successfully.`
 );
 
-    // ✅ SUCCESS RESPONSE
+    //  SUCCESS RESPONSE
     res.json({
-      message: "Login Successful ✅",
+      message: "Login Successful ",
       token: generateToken(user._id),
       user: {
         _id: user._id.toString(),
         name: user.name || "",
         email: user.email || "",
-        role: user.role || "resident" // 🔥 FIX HERE
+        role: user.role || "resident" //  resident
       }
     });
 
   } catch (error) {
-    console.log("LOGIN ERROR:", error); // 👈 IMPORTANT
+    //console.log("LOGIN ERROR:", error); //error msg
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// GET LOGGED-IN USER PROFILE
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id)
+      .select("-password")
+      .populate("room", "roomNumber"); // 🔥 IMPORTANT
+
+    res.json(user);
+  } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
 //logout
 
-// 🔴 LOGOUT
+//  LOGOUT
 exports.logout = async (req, res) => {
   try {
 
@@ -128,7 +141,7 @@ exports.logout = async (req, res) => {
 
     await sendNotification({
       userId: req.user._id,
-      message: "You logged out successfully 👋",
+      message: "You logged out successfully ",
       type:"info"
     });
 
@@ -136,7 +149,7 @@ exports.logout = async (req, res) => {
 
     await sendEmail(
   req.user.email,
-  "Logout Alert 👋",
+  "Logout Alert ",
   `Hi ${req.user.name}, you logged out successfully.`
 );
 

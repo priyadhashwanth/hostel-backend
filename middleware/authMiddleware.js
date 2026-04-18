@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
-// ✅ Protect Route (Authentication)
+//  Protect Route (Authentication)
 
 exports.protect = async (req, res, next) => {
   try {
@@ -18,7 +18,7 @@ exports.protect = async (req, res, next) => {
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-      console.log("DECODED:", decoded); // ✅ debug
+      console.log("DECODED:", decoded); //  debug
 
       // Get user from DB
       const user = await User.findById(decoded.id || decoded._id).select("-password");
@@ -28,7 +28,7 @@ exports.protect = async (req, res, next) => {
         return res.status(401).json({ message: "User not found" });
       }
 
-      // ✅ IMPORTANT: attach user correctly
+      //  attach user correctly
       req.user = user;
 
       return next();
@@ -38,12 +38,12 @@ exports.protect = async (req, res, next) => {
     return res.status(401).json({ message: "No token provided" });
 
   } catch (error) {
-    console.log("Auth Error:", error.message);
+    //console.log("Auth Error:", error.message);
     return res.status(401).json({ message: "Not authorized" });
   }
 };
 
-// ✅ Role-based Authorization
+//  Role-based Authorization
 exports.authorizeRoles = (...roles) => {
   return (req, res, next) => {
     try {
@@ -51,7 +51,7 @@ exports.authorizeRoles = (...roles) => {
         return res.status(403).json({ message: "Access denied" });
       }
 
-      next(); // ✅ allowed
+      next(); //  allowed
     } catch (error) {
       return res.status(500).json({ message: "Authorization error" });
     }

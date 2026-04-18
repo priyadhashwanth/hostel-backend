@@ -26,7 +26,7 @@ exports.getNotifications = async (req, res) => {
 };
 
 
-// ✅ MARK AS READ
+//  MARK AS READ
 exports.markAsRead = async (req, res) => {
   try {
     const notification = await Notification.findById(req.params.id);

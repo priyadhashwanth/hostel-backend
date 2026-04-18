@@ -14,16 +14,14 @@ exports.createRoom = async (req, res) => {
       capacity
     });
     
-    // 🔔 Notification
-await sendNotification({
-  message:` New room ${roomNumber} created 🏠`,
+    //  Notification
+
+    await sendNotification({
+  message:` New room ${roomNumber} created `,
   type: "room"
 });
 
-
-     
-   
-    res.status(201).json({
+res.status(201).json({
       message: "Room created",
       room
     });
@@ -63,7 +61,7 @@ exports.assignRoom = async (req, res) => {
       return res.status(400).json({ message: "Room is full" });
     }
 
-    // ✅ prevent duplicate
+    // prevent duplicate
     if (room.occupants.includes(userId)) {
       return res.status(400).json({ message: "User already assigned" });
     }
@@ -74,7 +72,7 @@ exports.assignRoom = async (req, res) => {
     user.room = roomId;
     await user.save();
 
-    // ✅ IMPORTANT: populate before sending
+    // IMPORTANT: populate before sending
     const updatedRoom = await Room.findById(roomId)
       .populate("occupants", "name email");
 
@@ -82,7 +80,7 @@ exports.assignRoom = async (req, res) => {
 
       await sendNotification({
   userId: userId,
-  message:` Room ${room.roomNumber} assigned to you 🛏️`,
+  message:` Room ${room.roomNumber} assigned to you `,
   type: "room"
 });
 
@@ -133,7 +131,7 @@ exports.checkoutRoom = async (req, res) => {
 
     await sendNotification({
   userId: userId,
-  message: "You checked out from room 🏠",
+  message: "You checked out from room ",
   type: "room"
 });
 
@@ -154,7 +152,7 @@ await sendEmail(
   }
 };
 
-// ❌ Delete Room (Admin)
+//  Delete Room (Admin)
 exports.deleteRoom = async (req, res) => {
   try {
     const room = await Room.findByIdAndDelete(req.params.id);
@@ -166,7 +164,7 @@ exports.deleteRoom = async (req, res) => {
     //notification
 
     await sendNotification({
-  message: `Room ${room.roomNumber} deleted✏️`,
+  message: `Room ${room.roomNumber} deleted`,
   type: "room"
 });
 

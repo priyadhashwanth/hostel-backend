@@ -2,7 +2,7 @@ const Bill = require("../models/Bill");
 const Room = require("../models/Room");
 
 
-// ✅ 1. OCCUPANCY
+//  1. OCCUPANCY
 exports.getOccupancy = async (req, res) => {
   try {
     const rooms = await Room.find();
@@ -25,7 +25,7 @@ exports.getOccupancy = async (req, res) => {
 };
 
 
-// ✅ 2. REVENUE
+//  2. REVENUE
 exports.getRevenue = async (req, res) => {
   try {
     const bills = await Bill.find({ status: "paid" });
@@ -86,7 +86,7 @@ res.json(fullYear);
 };
 
 
-// ✅ 3. EXPENSES (STATIC)
+//  3. EXPENSES (STATIC)
 exports.getExpenses = async (req, res) => {
   try {
     const totalExpenses = 20000; // demo
@@ -99,17 +99,17 @@ exports.getExpenses = async (req, res) => {
 };
 
 
-// ✅ 4. FULL REPORT (MOST IMPORTANT)
+//  4. FULL REPORT (MOST IMPORTANT)
 exports.getFullReport = async (req, res) => {
   try {
-    // 🔹 Revenue
+    //  Revenue
     const bills = await Bill.find({ status: "paid" });
     const revenue = bills.reduce((acc, b) => acc + b.totalAmount, 0);
 
-    // 🔹 Expenses
+    //  Expenses
     const totalExpenses = 20000;
 
-    // 🔹 Occupancy
+    //  Occupancy
     const rooms = await Room.find();
     let capacity = 0, occupied = 0;
 
@@ -120,7 +120,7 @@ exports.getFullReport = async (req, res) => {
 
     const occupancyRate = (occupied / capacity) * 100;
 
-    // 🔹 Profit
+    //  Profit
     const profit = revenue - totalExpenses;
 
     res.json({

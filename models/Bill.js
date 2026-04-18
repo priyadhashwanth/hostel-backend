@@ -36,7 +36,7 @@ const billSchema = new mongoose.Schema({
   ],
   
 
- // ✅ OPTIONAL (Installments)
+ //   (Installments)
 
  installments: [
   {
