@@ -29,7 +29,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://aquamarine-sunshine-ffa60c.netlify.app/"
+    "https://aquamarine-sunshine-ffa60c.netlify.app"
     
   ],
   credentials: true
