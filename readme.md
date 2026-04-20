@@ -1,7 +1,6 @@
 view API documentation
     
-[API DOCUMENTATION] =  https://documenter.getpostman.com/view/52899657/2sBXqDshsv 
-
+[API DOCUMENTATION] =  https://documenter.getpostman.com/view/52899657/2sBXqDshsv
 HOSTEL MANAGEMENT SYSTEM:
 
    *comprehensive system for managing hostel operations, 

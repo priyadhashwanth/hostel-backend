@@ -25,6 +25,15 @@ const app = express();
 //  VERY IMPORTANT
 app.use(express.json());
 
+// Add CORS 
+app.use(cors({
+  origin: [
+    "http://localhost:5173"
+    
+  ],
+  credentials: true
+}));
+
 //  Body parser (VERY IMPORTANT)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
