@@ -18,17 +18,77 @@ const generateToken = (id) => {
 //  REGISTER
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role,phone,address,emergencyContact } = req.body;
+    const {
+      name,
+      email,
+      password,
+      role,
+      phone,
+      address,
+      emergencyContact
+    } = req.body;
 
-    const userExists = await User.findOne({ email });
+    // Required fields
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({
+        message: "Name, Email, Password and Role are required"
+      });
+    }
+
+    // Name length
+    if (name.trim().length < 3) {
+      return res.status(400).json({
+        message: "Name must be at least 3 characters"
+      });
+    }
+
+    // Email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email.trim())) {
+      return res.status(400).json({
+        message: "Invalid email format"
+      });
+    }
+
+    // Password
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters"
+      });
+    }
+
+    // Phone validation if provided
+    const phoneRegex = /^[0-9]{10}$/;
+
+    if (phone && !phoneRegex.test(phone)) {
+      return res.status(400).json({
+        message: "Phone must be 10 digits"
+      });
+    }
+
+    if (
+      emergencyContact?.phone &&
+      !phoneRegex.test(emergencyContact.phone)
+    ) {
+      return res.status(400).json({
+        message: "Emergency phone must be 10 digits"
+      });
+    }
+
+    // Existing user
+    const userExists = await User.findOne({
+      email: email.trim()
+    });
+
     if (userExists) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({
+        message: "User already exists"
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    //console.log("REQ BODY",req.body);
-
+    
     const user = await User.create({
       name,
       email,
@@ -71,7 +131,33 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
+    // Empty validation
+    if (!email || !password) {
+      return res.status(400).json({
+        message: "Email and Password are required"
+      });
+    }
+
+    // Trim spaces
+    const cleanEmail = email.trim();
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(cleanEmail)) {
+      return res.status(400).json({
+        message: "Invalid email format"
+      });
+    }
+
+    // Password length
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters"
+      });
+    }
+
+    const user = await User.findOne({ email:cleanEmail });
 
     //  Check user exists FIRST
     if (!user) {
@@ -154,6 +240,29 @@ exports.logout = async (req, res) => {
 );
 
     res.json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//delete resident
+
+exports.deleteResident = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "Resident not found" });
+    }
+
+    if (user.role.toLowerCase() !== "resident") {
+      return res.status(400).json({ message: "Only residents can be deleted" });
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+
+    res.status(200).json({ message: "Resident deleted successfully" });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

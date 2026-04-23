@@ -26,14 +26,14 @@ const app = express();
 app.use(express.json());
 
 // Add CORS 
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://aquamarine-sunshine-ffa60c.netlify.app"
+//app.use(cors({
+  //origin: [
+   // "http://localhost:5173",
+   // "https://aquamarine-sunshine-ffa60c.netlify.app"
     
-  ],
-  credentials: true
-}));
+  //],
+ // credentials: true
+//}));
 
 //  Body parser (VERY IMPORTANT)
 app.use(express.json());

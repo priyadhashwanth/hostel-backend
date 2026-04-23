@@ -24,6 +24,7 @@ exports.createBill = async (req, res) => {
       return res.status(400).json({ message: "User required" });
     }
 
+    //check user exists
     const user = await User.findById(userId);
 
     if (!user) {
@@ -36,6 +37,47 @@ exports.createBill = async (req, res) => {
     extraCharges = Number(extraCharges) || 0;
     discount = Number(discount) || 0;
     lateFee = Number(lateFee) || 0;
+
+    // Validations
+    if (isNaN(rent) || rent <= 0) {
+      return res.status(400).json({
+        message: "Rent must be greater than 0"
+      });
+    }
+
+    if (utilities < 0) {
+      return res.status(400).json({
+        message: "Utilities cannot be negative"
+      });
+    }
+
+    if (extraCharges < 0) {
+      return res.status(400).json({
+        message: "Extra charges cannot be negative"
+      });
+    }
+
+    if (discount < 0) {
+      return res.status(400).json({
+        message: "Discount cannot be negative"
+      });
+    }
+
+    if (lateFee < 0) {
+      return res.status(400).json({
+        message: "Late fee cannot be negative"
+      });
+    }
+
+    // Prevent huge discount
+    const subtotal =
+      rent + utilities + extraCharges + lateFee;
+
+    if (discount > subtotal) {
+      return res.status(400).json({
+        message: "Discount cannot exceed total charges"
+      });
+    }
 
     //  calculate total
     const total =

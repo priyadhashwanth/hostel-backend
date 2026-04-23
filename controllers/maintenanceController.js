@@ -9,9 +9,23 @@ exports.createRequest = async (req, res) => {
   try {
     const { title, issue, priority } = req.body;
 
-    if (!title || !issue) {
-      return res.status(400).json({ message: "All fields required" });
-    }
+if (!title?.trim() || !issue?.trim() || !priority) {
+  return res.status(400).json({
+    message: "All fields required"
+  });
+}
+
+if (title.trim().length < 3) {
+  return res.status(400).json({
+    message: "Title too short"
+  });
+}
+
+if (issue.trim().length < 5) {
+  return res.status(400).json({
+    message: "Issue too short"
+  });
+}
 
     const request = await Maintenance.create({
       user: req.user._id,

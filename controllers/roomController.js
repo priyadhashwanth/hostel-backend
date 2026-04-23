@@ -9,6 +9,36 @@ exports.createRoom = async (req, res) => {
   try {
     const { roomNumber, capacity } = req.body;
 
+    if (!roomNumber || !capacity) {
+      return res.status(400).json({
+        message: "Room number and capacity required"
+      });
+    }
+
+    const roomRegex = /^[A-Za-z0-9]+$/;
+
+    if (!roomRegex.test(roomNumber)) {
+      return res.status(400).json({
+        message: "Invalid room number"
+      });
+    }
+
+    if (isNaN(capacity) || capacity <= 0) {
+      return res.status(400).json({
+        message: "Capacity must be greater than 0"
+      });
+    }
+
+    const exists = await Room.findOne({
+      roomNumber
+    });
+
+    if (exists) {
+      return res.status(400).json({
+        message: "Room already exists"
+      });
+    }
+
     const room = await Room.create({
       roomNumber,
       capacity

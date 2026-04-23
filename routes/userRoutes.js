@@ -3,6 +3,7 @@ const router = express.Router();
 
 const User = require("../models/User");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
+const { deleteResident } = require("../controllers/authController");
 
 
 //  GET ALL USERS (Admin / Staff)
@@ -80,6 +81,10 @@ router.get(
     }
   }
 );
+
+//delete resident
+
+router.delete("/users/:id", deleteResident);
 
 
 module.exports = router;
