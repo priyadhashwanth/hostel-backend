@@ -34,7 +34,10 @@ emergencyContact: {
   },
 
   checkInDate:Date,
-  checkOutDate:Date
+  checkOutDate:Date,
+
+  resetToken: String,
+resetExpire: Date,
 
 
 }, { timestamps: true });
