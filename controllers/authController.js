@@ -284,7 +284,7 @@ exports.forgotPassword = async (req, res) => {
 
   await user.save();
 
-  const link = `http://localhost:5173/reset-password/${token}`;
+  const link = `https://marvelous-jalebi-27c0d6.netlify.app/${token}`;
 
   await sendEmail(
     user.email,
