@@ -29,7 +29,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
    "http://localhost:5173",
-   "https://marvelous-jalebi-27c0d6.netlify.app"
+   "https://hostel-frontent.netlify.app"
     
   ],
   credentials: true
