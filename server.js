@@ -29,7 +29,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
    "http://localhost:5173",
-   "https://tranquil-clafoutis-5cabf6.netlify.app"
+   "https://marvelous-jalebi-27c0d6.netlify.app"
     
   ],
   credentials: true
