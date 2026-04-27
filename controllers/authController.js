@@ -284,7 +284,7 @@ exports.forgotPassword = async (req, res) => {
 
   await user.save();
 
-  const link = `https://hostel-frontent.netlify.app/${token}`;
+  const link = `https://tranquil-clafoutis-5cabf6.netlify.app/${token}`;
 
   await sendEmail(
     user.email,
