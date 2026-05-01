@@ -11,11 +11,12 @@ exports.getOccupancy = async (req, res) => {
     let occupied = 0;
 
     rooms.forEach(room => {
-      totalCapacity += room.capacity;
-      occupied += room.occupants.length;
+      totalCapacity += room.capacity || 0;
+      occupied += room.occupants?.length || 0;
     });
 
-    const occupancyRate = (occupied / totalCapacity) * 100;
+    const occupancyRate =
+      totalCapacity > 0 ? (occupied / totalCapacity) * 100 : 0;
 
     res.json({ occupancyRate });
 
@@ -26,14 +27,20 @@ exports.getOccupancy = async (req, res) => {
 
 
 //  2. REVENUE
+
 exports.getRevenue = async (req, res) => {
   try {
-    const bills = await Bill.find({ status: "paid" });
+    const result = await Bill.aggregate([
+      { $match: { status: "paid" } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalAmount" }
+        }
+      }
+    ]);
 
-    const totalRevenue = bills.reduce(
-      (acc, bill) => acc + bill.totalAmount,
-      0
-    );
+    const totalRevenue = result[0]?.total || 0;
 
     res.json({ totalRevenue });
 
@@ -46,81 +53,76 @@ exports.getRevenue = async (req, res) => {
 
 exports.getMonthlyRevenue = async (req, res) => {
   try {
-    const bills = await Bill.find({ status: "paid" });
+    const data = await Bill.aggregate([
+      { $match: { status: "paid" } },
+      {
+        $group: {
+          _id: { $month: "$createdAt" },
+          revenue: { $sum: "$totalAmount" }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
 
-    const monthlyData = {};
+    const monthNames = [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec"
+    ];
 
-    bills.forEach((bill) => {
-      const date = new Date(bill.createdAt);
-      const month = date.toLocaleString("default", { month: "short" });
+    let fullYear = monthNames.map((month, index) => ({
+      month,
+      revenue: 0
+    }));
 
-      if (!monthlyData[month]) {
-        monthlyData[month] = 0;
+    data.forEach(item => {
+      const monthIndex = item._id - 1; // Mongo months start from 1
+      if (fullYear[monthIndex]) {
+        fullYear[monthIndex].revenue = item.revenue;
       }
-
-      monthlyData[month] += bill.totalAmount;
     });
 
-    const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-
-// Step 1: create all months with 0
-let fullYear = monthNames.map(month => ({
-  month,
-  revenue: 0
-}));
-
-// Step 2: fill actual data
-Object.keys(monthlyData).forEach(month => {
-  const index = monthNames.indexOf(month);
-  if (index !== -1) {
-    fullYear[index].revenue = monthlyData[month];
-  }
-});
-
-// Step 3: send response
-res.json(fullYear);
+    res.json(fullYear);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
+//get full report
 
-//  3. EXPENSES (STATIC)
-exports.getExpenses = async (req, res) => {
-  try {
-    const totalExpenses = 20000; // demo
-
-    res.json({ totalExpenses });
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-
-//  4. FULL REPORT (MOST IMPORTANT)
 exports.getFullReport = async (req, res) => {
   try {
-    //  Revenue
-    const bills = await Bill.find({ status: "paid" });
-    const revenue = bills.reduce((acc, b) => acc + b.totalAmount, 0);
+    // Revenue
+    const revenueResult = await Bill.aggregate([
+      { $match: { status: "paid" } },
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalAmount" }
+        }
+      }
+    ]);
 
-    //  Expenses
+    const revenue = revenueResult[0]?.total || 0;
+
+    // Expenses (static for now)
     const totalExpenses = 20000;
 
-    //  Occupancy
+    // Occupancy
     const rooms = await Room.find();
-    let capacity = 0, occupied = 0;
+
+    let capacity = 0;
+    let occupied = 0;
 
     rooms.forEach(r => {
-      capacity += r.capacity;
-      occupied += r.occupants.length;
+      capacity += r.capacity || 0;
+      occupied += r.occupants?.length || 0;
     });
 
-    const occupancyRate = (occupied / capacity) * 100;
+    const occupancyRate =
+      capacity > 0 ? (occupied / capacity) * 100 : 0;
 
-    //  Profit
+    // Profit
     const profit = revenue - totalExpenses;
 
     res.json({
@@ -130,6 +132,17 @@ exports.getFullReport = async (req, res) => {
       occupancyRate
     });
 
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//get expense
+
+exports.getExpenses = async (req, res) => {
+  try {
+    const totalExpenses = 20000; // demo value
+    res.json({ totalExpenses });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

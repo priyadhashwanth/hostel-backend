@@ -9,6 +9,16 @@ exports.createRequest = async (req, res) => {
   try {
     const { title, issue, priority } = req.body;
 
+    // for room assigned then maintainence can raise
+    const user = await User.findById(req.user._id);
+
+    if (!user.room) {
+      return res.status(400).json({
+        message: "Room not assigned. Cannot create maintenance request."
+      });
+    }
+
+
 if (!title?.trim() || !issue?.trim() || !priority) {
   return res.status(400).json({
     message: "All fields required"
@@ -29,6 +39,7 @@ if (issue.trim().length < 5) {
 
     const request = await Maintenance.create({
       user: req.user._id,
+      room:user.room,
       title,
       issue,
       priority
@@ -54,6 +65,8 @@ exports.getMyRequests = async (req, res) => {
     const requests = await Maintenance.find({
       user: req.user._id
     })
+    .populate("user", "name")
+    .populate("room", "roomNumber")
     .populate("assignedTo","name");
 
     res.json(requests);

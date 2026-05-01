@@ -3,9 +3,44 @@ const router = express.Router();
 
 const User = require("../models/User");
 const { protect, authorizeRoles } = require("../middleware/authMiddleware");
-const { deleteResident } = require("../controllers/authController");
+const roleMiddleware = require("../middleware/roleMiddleware");
+
+const {
+  deleteResident,
+  getAdminDashboard,
+  getResidentDashboard,getMe
+} = require("../controllers/userController");
+
+//maintainence req
+router.get("/me", protect, getMe);
+
+//  Admin Dashboard
+router.get(
+  "/admin-dashboard",
+  protect,
+  roleMiddleware(["admin"]),
+  getAdminDashboard
+);
+
+//  Resident Dashboard
+router.get(
+  "/resident-dashboard",
+  protect,
+  roleMiddleware(["resident"]),
+  getResidentDashboard
+);
+
+// ✅ THEN dynamic route
+router.get(
+  "/:id",
+  protect,
+  async (req, res) => {
+    // your code
+  }
+);
 
 
+//users
 //  GET ALL USERS (Admin / Staff)
 router.get(
   "/",protect,authorizeRoles("admin","staff"),
@@ -59,6 +94,11 @@ router.put(
   }
 );
 
+//delete resident
+
+router.delete("/users/:id", deleteResident);
+
+
 
 //  GET SINGLE USER (optional)
 router.get(
@@ -82,9 +122,9 @@ router.get(
   }
 );
 
-//delete resident
 
-router.delete("/users/:id", deleteResident);
+
+
 
 
 module.exports = router;

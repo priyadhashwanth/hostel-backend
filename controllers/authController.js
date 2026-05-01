@@ -17,6 +17,7 @@ const generateToken = (id) => {
 };
 
 //  REGISTER
+
 exports.register = async (req, res) => {
   try {
     const {
@@ -29,55 +30,104 @@ exports.register = async (req, res) => {
       emergencyContact
     } = req.body;
 
-    // Required fields
-    if (!name || !email || !password || !role) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phoneRegex = /^[0-9]{10}$/;
+
+    // ✅ Required fields
+    if (!name?.trim() || !email?.trim() || !password?.trim() || !role) {
       return res.status(400).json({
         message: "Name, Email, Password and Role are required"
       });
     }
 
-    // Name length
+    // ✅ Role validation (IMPORTANT)
+    const validRoles = ["resident", "staff"];
+
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({
+        message: "Invalid role selected"
+      });
+    }
+
+    // 🔒 Block admin creation
+    if (role === "admin") {
+      return res.status(403).json({
+        message: "Admin cannot be created from register"
+      });
+    }
+
+    // ✅ Name validation
     if (name.trim().length < 3) {
       return res.status(400).json({
         message: "Name must be at least 3 characters"
       });
     }
 
-    // Email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+    // ✅ Email validation
     if (!emailRegex.test(email.trim())) {
       return res.status(400).json({
         message: "Invalid email format"
       });
     }
 
-    // Password
+    // ✅ Password validation
     if (password.length < 6) {
       return res.status(400).json({
         message: "Password must be at least 6 characters"
       });
     }
 
-    // Phone validation if provided
-    const phoneRegex = /^[0-9]{10}$/;
-
+    // ✅ Phone validation
     if (phone && !phoneRegex.test(phone)) {
       return res.status(400).json({
         message: "Phone must be 10 digits"
       });
     }
 
-    if (
-      emergencyContact?.phone &&
-      !phoneRegex.test(emergencyContact.phone)
-    ) {
-      return res.status(400).json({
-        message: "Emergency phone must be 10 digits"
-      });
+    // ✅ Address validation
+    if (!address || !address.trim()) {
+  return res.status(400).json({
+    message: "Address is required"
+  });
+}
+
+if (address.trim().length < 5) {
+  return res.status(400).json({
+    message: "Address must be at least 5 characters"
+  });
+}
+
+    // ✅ Emergency validation ONLY for resident
+    if (role === "resident") {
+      if (!emergencyContact) {
+        return res.status(400).json({
+          message: "Emergency contact required for residents"
+        });
+      }
+
+      const { name: eName, phone: ePhone, relation } = emergencyContact;
+
+      if (!eName?.trim()) {
+        return res.status(400).json({
+          message: "Emergency name required"
+        });
+      }
+
+      if (!phoneRegex.test(ePhone)) {
+        return res.status(400).json({
+          message: "Emergency phone must be 10 digits"
+        });
+      }
+
+      if (!relation?.trim()) {
+        return res.status(400).json({
+          message: "Emergency relation required"
+        });
+      }
     }
 
-    // Existing user
+    
+ // Existing user
     const userExists = await User.findOne({
       email: email.trim()
     });
@@ -218,7 +268,7 @@ exports.getProfile = async (req, res) => {
   }
 };
 
-//logout
+
 
 //  LOGOUT
 exports.logout = async (req, res) => {
@@ -246,28 +296,7 @@ exports.logout = async (req, res) => {
   }
 };
 
-//delete resident
 
-exports.deleteResident = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-
-    if (!user) {
-      return res.status(404).json({ message: "Resident not found" });
-    }
-
-    if (user.role.toLowerCase() !== "resident") {
-      return res.status(400).json({ message: "Only residents can be deleted" });
-    }
-
-    await User.findByIdAndDelete(req.params.id);
-
-    res.status(200).json({ message: "Resident deleted successfully" });
-
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
 
 //forgot password
 

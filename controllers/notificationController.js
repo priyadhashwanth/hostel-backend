@@ -11,10 +11,10 @@ exports.getNotifications = async (req, res) => {
       .sort({createdAt:-1});
     }else{
      notifications = await Notification.find({
-      $or: [
-        { user: req.user._id },  // user specific
-        { user: null }           // global
-      ]
+      
+         user: req.user._id   // user specific
+        
+    
     }).sort({ createdAt: -1 });
   }
 
@@ -29,7 +29,10 @@ exports.getNotifications = async (req, res) => {
 //  MARK AS READ
 exports.markAsRead = async (req, res) => {
   try {
-    const notification = await Notification.findById(req.params.id);
+    const notification = await Notification.findOne({
+      _id:req.params.id,
+    user:req.user._id
+    });
 
     if (!notification) {
       return res.status(404).json({ message: "Notification not found" });

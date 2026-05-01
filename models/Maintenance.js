@@ -5,6 +5,13 @@ const maintenanceSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User"
   },
+
+  //room number will show in maintainence req
+  room: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Room"
+  },
+
   title: {
     type: String,
     required: true
