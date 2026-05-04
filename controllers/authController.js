@@ -313,7 +313,7 @@ exports.forgotPassword = async (req, res) => {
 
   await user.save();
 
-  const link = `https://tranquil-clafoutis-5cabf6.netlify.app/${token}`;
+  const link = `https://aquamarine-biscochitos-2b8086.netlify.app/${token}`;
 
   await sendEmail(
     user.email,
