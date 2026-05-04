@@ -26,21 +26,21 @@ const app = express();
 app.use(express.json());
 
 // Add CORS 
-app.use(cors({
-  origin: [
-   "http://localhost:5173",
-   "https://aquamarine-biscochitos-2b8086.netlify.app"
+//app.use(cors({
+  //origin: [
+   //"http://localhost:5173",
+   //"https://aquamarine-biscochitos-2b8086.netlify.app"
     
-  ],
- credentials: true
-}));
+ // ],
+ //credentials: true
+//}));
 
 //  Body parser (VERY IMPORTANT)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Enable CORS
-//app.use(cors());
+app.use(cors());
 
 //  Routes
 app.use("/api/auth", require("./routes/authRoutes"));
