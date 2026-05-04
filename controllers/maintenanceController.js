@@ -197,6 +197,7 @@ exports.getAllRequests = async (req, res) => {
   try {
     const requests = await Maintenance.find()
       .populate("user", "name")
+      .populate("room","roomNumber")
       .populate("assignedTo", "name");
 
     res.json(requests);
