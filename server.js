@@ -30,7 +30,8 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "http://localhost:5173",
-    "https://genuine-wisp-7615d3.netlify.app"
+    "https://velvety-sprite-d5a529.netlify.app",
+   
   ],
   credentials: true
 }));
