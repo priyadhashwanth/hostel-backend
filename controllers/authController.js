@@ -313,7 +313,7 @@ exports.forgotPassword = async (req, res) => {
 
   await user.save();
 
-  const link = `http://localhost:5173/${token}`;
+  const link = `https://genuine-wisp-7615d3.netlify.app/${token}`;
 
   await sendEmail(
     user.email,
