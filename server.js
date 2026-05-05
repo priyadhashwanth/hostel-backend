@@ -28,8 +28,8 @@ app.use(express.json());
 // Add CORS 
 
 app.use(cors({
-  origin:true,
-   credentials: true
+  origin:"*"
+   
 }));
 
 //  Body parser (VERY IMPORTANT)
