@@ -313,7 +313,7 @@ exports.forgotPassword = async (req, res) => {
 
   await user.save();
 
-  const link = `http://localhost:5000/${token}`;
+  const link = `http://localhost:5173/${token}`;
 
   await sendEmail(
     user.email,
