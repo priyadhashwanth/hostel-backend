@@ -28,12 +28,8 @@ app.use(express.json());
 // Add CORS 
 
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "https://velvety-sprite-d5a529.netlify.app",
-   
-  ],
-  credentials: true
+  origin:true,
+   credentials: true
 }));
 
 //  Body parser (VERY IMPORTANT)
